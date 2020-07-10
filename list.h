@@ -51,6 +51,7 @@ char *list_insert_after();
 char *list_remove_front();
 char *list_remove_rear();
 char *list_remove_curr();
+int list_traverse();
 void list_free();
 
 /* Define some constants for controlling list traversals.  We

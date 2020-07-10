@@ -431,8 +431,8 @@ void (*dealloc)();
       /* Apply either no deallocation function to each node, our own, or
        * a user-supplied version.
        */
-      if ((int) dealloc != LIST_NODEALLOC) {
-	 if ((int) dealloc == LIST_DEALLOC) {
+      if ( dealloc != (void (*)())LIST_NODEALLOC) {
+	 if ( dealloc ==  (void (*)())LIST_DEALLOC) {
 	    free(data);
 	 }
 	 else {
