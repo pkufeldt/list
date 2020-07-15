@@ -61,9 +61,6 @@ static char brag[] = "$$Version: list-2.1 Copyright (C) 1992 Bradley C. Spatz";
 #include <string.h>
 #include "list.h"
 
-//char *malloc();
-
-
 LIST *list_init()
 {
    LIST *list;
@@ -71,9 +68,9 @@ LIST *list_init()
    /* Allocate, initialize, and return a new list. */
    list = (LIST *) malloc(sizeof(LIST));
    list->size = 0;
-   list->front = NULL;;
-   list->rear = NULL;;
-   list->curr = NULL;;
+   list->front = NULL;
+   list->rear = NULL;
+   list->curr = NULL;
    return(list);
 }
 
@@ -108,6 +105,70 @@ LIST *list;
 }
 
 
+/* The following are definitions of these routines as functions.  We can
+ * force thse to be implemented as macros by compiling with -DUSE_MACROS.
+ * The macros are defined in the header file(s).  The macros afford better
+ * performance, and if users know the routines are implemented as such,
+ * they can always wrap their own functions aroud the macros if they need
+ * function semantics (i.e. using the routines as pointers, as in passing
+ * the routines as parameters to other functions.
+ */
+#ifndef USE_MACROS
+LIST *list_mvfront(list)
+LIST *list;
+{
+   /* Move to the front of the list.*/
+   list->curr = list->front;
+   return(list);
+}
+
+
+LIST *list_mvrear(list)
+LIST *list;
+{
+   /* Move to the front of the list.*/
+   list->curr = list->rear;
+   return(list);
+}
+
+
+int list_empty(list)
+LIST *list;
+{
+   /* Return 1 if the list is empty.  0 otherwise. */
+   return((list->front == NULL) ? TRUE : FALSE);
+}
+
+
+char *list_front(list)
+LIST *list;
+{
+   return((list->front == NULL) ? NULL : (list->front->data));
+}
+
+
+char *list_curr(list)
+LIST *list;
+{
+   return((list->curr == NULL) ? NULL : (list->curr->data));
+}
+
+
+char *list_rear(list)
+LIST *list;
+{
+   return((list->rear == NULL) ? NULL : (list->rear->data));
+}
+
+
+int list_size(list)
+LIST *list;
+{
+   return(list->size);
+}
+#endif
+
+
 static LIST_ELEMENT *list_create_element(data, bytes)
 char *data;
 int bytes;
@@ -130,7 +191,7 @@ int bytes;
       if (new->data == NULL) {
 	 return(NULL);
       }
-      (void)memcpy(new->data, data, bytes);
+      (void) memcpy(new->data, data, bytes);
    }
    else {
       new->data = (char *) data;
@@ -431,8 +492,8 @@ void (*dealloc)();
       /* Apply either no deallocation function to each node, our own, or
        * a user-supplied version.
        */
-      if ( dealloc != (void (*)())LIST_NODEALLOC) {
-	 if ( dealloc ==  (void (*)())LIST_DEALLOC) {
+      if (dealloc != (void (*)())LIST_NODEALLOC) {
+	 if (dealloc == (void (*)())LIST_DEALLOC) {
 	    free(data);
 	 }
 	 else {

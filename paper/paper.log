@@ -1,0 +1,37 @@
+This is TeX, C Version 3.0 (format=lplain 90.9.25)  30 MAR 1992 11:09
+**&latex paper
+(paper.tex
+LaTeX Version 2.09 <7 Dec 1989>
+(/usr/local/lib/tex/inputs/article.sty
+Document Style `article' <16 Mar 88>.
+(/usr/local/lib/tex/inputs/art11.sty)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+) (/usr/local/lib/tex/inputs/fullpage.sty) (paper.aux) [1
+
+] (paper.toc)
+\tf@toc=\write3
+ (paper.lof)
+\tf@lof=\write4
+ (paper.lot)
+\tf@lot=\write5
+ [2] (list.tex) [1]
+[2] [3] [4] [5] [6] [7] [8] [9] [10] [11]
+\c@bogusref=\count87
+ [12] [13] [14] (paper.aux) ) 
+Here is how much of TeX's memory you used:
+ 190 strings out of 6963
+ 1728 string characters out of 63241
+ 43075 words of memory out of 262141
+ 2114 multiletter control sequences out of 9500
+ 19465 words of font info for 74 fonts, out of 72000 for 255
+ 14 hyphenation exceptions out of 607
+ 16i,10n,15p,320b,246s stack positions out of 300i,40n,60p,3000b,4000s
+
+Output written on paper.dvi (16 pages, 52400 bytes).

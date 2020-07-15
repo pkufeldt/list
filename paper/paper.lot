@@ -1,0 +1,4 @@
+\contentsline {table}{\numberline {1}{\ignorespaces Options for {\ptt list\unhbox \voidb@x \kern .06em \vbox {\hrule width.3em}traverse}. \unhbox \voidb@x \hbox {$\mathsurround =\z@ \mathchar "279$}\ indicates a default.}}{13}
+\contentsline {table}{\numberline {2}{\ignorespaces Summary of the {\ptt list(3)} routines. \unhbox \voidb@x \hbox {$\mathsurround =\z@ \mathchar "279$}\ indicates a macro.}}{13}
+\contentsline {table}{\numberline {3}{\ignorespaces Queue and stack routine mappings to the {\ptt list(3)} library.}}{13}
+\contentsline {table}{\numberline {4}{\ignorespaces Summary of performance tests with integer elements.}}{14}

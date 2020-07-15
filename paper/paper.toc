@@ -1,0 +1,17 @@
+\contentsline {section}{\numberline {1}Why a List Package?}{1}
+\contentsline {section}{\numberline {2}The List Design}{1}
+\contentsline {subsection}{\numberline {2.1}Data Abstraction}{1}
+\contentsline {subsection}{\numberline {2.2}Instantiation}{2}
+\contentsline {subsection}{\numberline {2.3}Insertion and Removal}{2}
+\contentsline {subsection}{\numberline {2.4}Memory Management}{3}
+\contentsline {subsection}{\numberline {2.5}Movement and Traversals}{4}
+\contentsline {subsection}{\numberline {2.6}Improving Performance}{5}
+\contentsline {subsection}{\numberline {2.7}The Finished Interface}{6}
+\contentsline {section}{\numberline {3}Queues and Stacks}{6}
+\contentsline {subsection}{\numberline {3.1}Our Friend, {\ptt cpp}}{6}
+\contentsline {section}{\numberline {4}A Cache Package}{7}
+\contentsline {subsection}{\numberline {4.1}Exploiting {\ptt list\unhbox \voidb@x \kern .06em \vbox {\hrule width.3em}traverse}}{9}
+\contentsline {section}{\numberline {5}Reassessing Performance}{10}
+\contentsline {section}{\numberline {6}Conclusions}{11}
+\contentsline {section}{\numberline {A}References}{12}
+\contentsline {section}{\numberline {B}Availability}{12}
