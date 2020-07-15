@@ -30,8 +30,8 @@ I have tested this package on Sun3, Sun4, DecStation 5000, PC/RT, HP
 9000-400, and Sony(68030, News 3.3) architectures, and it performs
 well.  Please notify me of bug reports, comments, or suggestions.
 
-This package is constrained by the GNU General Public License as published
-by the Free Software Foundation.  See the file COPYING for details.
+This package is constrained by the GNU Library General Public License as 
+published by the Free Software Foundation.  See the file COPYING for details.
 
 Enjoy.
 
