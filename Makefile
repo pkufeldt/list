@@ -66,6 +66,8 @@ install:
 		install -c list.h $(INCDIR)
 		install -c queue.h $(INCDIR)
 		install -c stack.h $(INCDIR)
+
+install.examples:
 		(cd examples/cache; make install)
 
 install.man:
