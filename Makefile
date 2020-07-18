@@ -38,6 +38,8 @@ INCDIR	= /usr/local/include
 # prototype.  To be sure, you can always make clean and make.
 
 all:		liblist.a #list.3 queue.3 stack.3
+
+examples:
 		(cd examples; make)
 
 liblist.a:	list.o
