@@ -72,5 +72,6 @@ install.man:
 		install -c stack.3 $(MANDIR)/man3
 
 clean:
-		rm -f *.o *.a list.h *.3 core
+		rm -f *.o *.a *.3 core
+#		rm -f *.o *.a list.h *.3 core
 		(cd examples; make clean)
