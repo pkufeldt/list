@@ -46,8 +46,8 @@ liblist.a:	list.o
 
 list.o:		list.h list.3 Makefile
 
-list.h:		list.h.proto Makefile
-		$(CPP) $(DEFINES) list.h.proto > list.h
+#list.h:		list.h.proto Makefile
+#		$(CPP) $(DEFINES) list.h.proto > list.h
 
 list.3:		list.man list.c Makefile
 		$(CPP) $(DEFINES) list.man > list.3
