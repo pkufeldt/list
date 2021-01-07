@@ -25,9 +25,15 @@ static char brag[] = "$$Version: stacktest-2.1 Copyright (C) 1992 Bradley C. Spa
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include <stddef.h>
 #include "../stack.h"
 
-main()
+list_boolean_t print_element(void *input, void *curr);
+int print_stack(STACK *stack);
+
+int
+main(int argc, char *argv[])
 {
    STACK *stack;
    char cmd;
@@ -78,7 +84,7 @@ main()
 	    printf("Stack is%s empty.\n", (stack_empty(stack) ? "" : " not"));
 	    break;
 	 case 'q':
-	    stack_free(stack, STACK_DEALLOC);
+	    stack_free(stack, (void *)STACK_DEALLOC);
 	    exit(0);
 	    break;
          default:
@@ -98,18 +104,17 @@ main()
  * searching the list or something.  We must return 0 or 1, so we always
  * return 1.
  */
-int print_element(input, curr)
-char *input;
-char *curr;
+list_boolean_t
+print_element(void *input, void *curr)
 {
    printf(" %d", *(int *) curr);
-   return(TRUE);
+   return(STACK_TRUE);
 }
 
 
 /* Routine to print a stack of integers. */
-print_stack(stack)
-STACK *stack;
+int
+print_stack(STACK *stack)
 {
    printf("Stack: ");
    if (stack_empty(stack))

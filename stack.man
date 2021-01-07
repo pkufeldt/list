@@ -15,37 +15,31 @@ cc [
 .nf
 .PP
 .ft B
+\#include <stdinc.h>
+\#include <stddef.h>
 \#include <stack.h>
 .PP
 .ft B
 STACK *stack_init()
 .PP
 .ft B
-char *stack_push(stack, data, bytes)
-    STACK *stack;
-    char *data;
-    int bytes;
+void *stack_push(STACK *stack, void *data, size_t bytes)
 .PP
 .ft B
-char *stack_pop(stack)
-    STACK *stack;
+void *stack_pop(STACK *stack)
 .PP
 .ft B
-char *stack_top(stack)
-    STACK *stack;
+void *stack_top(STACK *stack)
 .PP
 .ft B
-int stack_size(stack)
-    STACK *stack;
+uint32_t stack_size(STACK *stack)
 .PP
 .ft B
-int stack_empty(stack)
-    STACK *stack;
+list_boolean_t stack_empty(STACK *stack)
 .PP
 .ft B
-void stack_free(stack, dealloc)
-    STACK *stack;
-    void (*dealloc)();
+void stack_free(STACK *stack, list_deallocator_t dealloc)
+
 .SH DESCRIPTION
 These routines provide generic stack manipulation of (potentially)
 multiple stacks.  Each stack can hold arbitrarily sized elements, with
@@ -87,26 +81,17 @@ and returns a pointer to the removed data.
 .IR stack_top
 returns a pointer to the element at the top of
 .IR stack ,
-but does not remove the element. \c
-#ifdef USE_MACROS
-This routine is implemented as a macro. \c
-#endif
+but does not remove the element.
 .PP
 .IR stack_size
 returns the number of elements on
 .IR stack
-as an integer. \c
-#ifdef USE_MACROS
-This routine is implemented as a macro. \c
-#endif
+as an unsigned integer.
 .PP
 .IR stack_empty
-returns 1 (TRUE) if
+returns 1 (STACK_TRUE) if
 .IR stack
-is empty, 0 (FALSE) otherwise. \c
-#ifdef USE_MACROS
-This routine is implemented as a macro. \c
-#endif
+is empty, 0 (STACK_FALSE) otherwise.
 .PP
 .IR stack_free
 deallocates
@@ -115,14 +100,14 @@ applying the user-supplied function
 .IR dealloc
 to the data portion of each element remaining in the stack.  If
 .IR dealloc
-is STACK_DEALLOC, then the package will apply its own deallocation
+is (void *)STACK_DEALLOC, then the package will apply its own deallocation
 routine.  This, however, should only be done if the package has been
 responsible for data element allocation, i.e., the push routine has
 been invoked with
 .IR bytes
 greater than 0.  If
 .IR dealloc
-is STACK_NODEALLOC, no per-element deallocation will be performed.
+is (void *)STACK_NODEALLOC, no per-element deallocation will be performed.
 .SH MEMORY ALLOCATION
 Both
 .IR stack_init

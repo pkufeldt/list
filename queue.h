@@ -30,14 +30,16 @@
  * where we add new elements.  We remove elements from the front.
  * With this model, we map onto the list primitives directly.
  */
-#define q_init()                        list_init()
+#define q_init()                        list_create()
 #define q_enqueue(queue, data, bytes)   list_insert_after(queue, data, bytes)
 #define q_dequeue(queue)                list_remove_front(queue)    
 #define q_front(queue)                  list_front(queue)
 #define q_size(queue)                   list_size(queue)
 #define q_empty(queue)                  list_empty(queue)
-#define q_free(queue, dealloc)          list_free(queue, dealloc)
+#define q_free(queue, dealloc)          list_destroy(queue, dealloc)
 
 /* Define the deallocation constants. */
 #define QUEUE_DEALLOC   LIST_DEALLOC
 #define QUEUE_NODEALLOC LIST_NODEALLOC
+#define QUEUE_TRUE	LIST_TRUE
+#define QUEUE_FALSE	LIST_FALSE

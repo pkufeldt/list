@@ -20,12 +20,10 @@
 #
 #
 CC	= gcc
-CFLAGS	= $(INCLUDES) -fstrength-reduce -finline-functions
-#CFLAGS	= $(INCLUDES)
+CFLAGS	= $(INCLUDES) -g -O2
 INCLUDES= -I..
 LIBS	= -L.. -llist
-#LIBS	= -L .. -llist   # Use this for HP-UX; great loader guys!
-#
+
 all:		listtest queuetest stacktest
 		(cd cache; make)
 

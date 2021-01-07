@@ -25,9 +25,15 @@ static char brag[] = "$$Version: queuetest-2.1 Copyright (C) 1992 Bradley C. Spa
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include <stddef.h>
 #include "../queue.h"
 
-main()
+list_boolean_t print_element(void *input, void *curr);
+int print_queue(QUEUE *queue);
+
+int
+main(int argc, char *argv[])
 {
    QUEUE *q;
    char cmd;
@@ -78,7 +84,7 @@ main()
 	    printf("Queue is%s empty.\n", (q_empty(q) ? "" : " not"));
 	    break;
 	 case 'q':
-	    q_free(q, QUEUE_DEALLOC);
+		 q_free(q, (void *)QUEUE_DEALLOC);
 	    exit(0);
 	    break;
          default:
@@ -98,18 +104,17 @@ main()
  * searching the list or something.  We must return 0 or 1, so we always
  * return 1.
  */
-int print_element(input, curr)
-char *input;
-char *curr;
+list_boolean_t
+print_element(void *input, void *curr)
 {
    printf(" %d", *(int *) curr);
-   return(TRUE);
+   return(QUEUE_TRUE);
 }
 
 
 /* Routine to print a queue of integers. */
-print_queue(queue)
-QUEUE *queue;
+int
+print_queue(QUEUE *queue)
 {
    printf("Queue: ");
    if (q_empty(queue))

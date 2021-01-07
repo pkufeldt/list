@@ -23,70 +23,87 @@
 #ifndef _LIST_H
 #define _LIST_H
 
-/* Define a structure to describe the list. */
-struct list_t {
-   int size;
-   struct list_element_t *front;
-   struct list_element_t *rear;
-   struct list_element_t *curr;
-};
-
-/* Define a structure to describe each element in the list. */
-struct list_element_t {
-   struct list_element_t *prev;
-   struct list_element_t *next;
-   char *data;
-};
-
-/* Structs are ugly, so... */
-typedef struct list_t LIST;
-typedef struct list_element_t LIST_ELEMENT;
-
-/* Prototype ahoy! */
-LIST *list_init();
-LIST *list_mvprev();
-LIST *list_mvnext();
-char *list_insert_before();
-char *list_insert_after();
-char *list_remove_front();
-char *list_remove_rear();
-char *list_remove_curr();
-int list_traverse();
-void list_free();
+/* Make LISTs opaque */
+typedef void LIST;
+typedef void LIST_ELEMENT;
 
 /* Define some constants for controlling list traversals.  We
  * bit-code the attributes so they can be OR'd together.
  */
-#define LIST_FORW	0
-#define LIST_BACK	2
-#define LIST_FRNT	4
-#define LIST_CURR	8
-#define LIST_REAR	18   /* 16 + 2, since REAR implies BACKwards. */
-#define LIST_SAVE	32
-#define LIST_ALTR	64
+typedef enum list_bits {
+	LIST_FORW	= 0x00,
+	LIST_BACK	= 0x02, 
+       	LIST_FRNT	= 0x04 | LIST_FORW, /* def, FRNT implies FORWwards. */
+	LIST_CURR	= 0x08,
+	LIST_REAR	= 0x10 | LIST_BACK, /* REAR implies BACKwards. */
+	LIST_SAVE	= 0x20,		    /* def */
+	LIST_ALTR	= 0x40,
+} list_bits_t;
 
 /* Define some constants for return codes and such. */
+typedef enum list_boolean {
+	LIST_TRUE  = 1,
+	LIST_FALSE = 0,
+} list_boolean_t;
 
+typedef enum list_constants {
+	LIST_DEALLOC   = -1,
+	LIST_NODEALLOC = -2,
+	LIST_EMPTY     = 0,
+	LIST_OK        = 1,
+	LIST_EXTENT    = 2,
+} list_constants_t;
 
-#ifndef TRUE
-#define TRUE  1
-#endif
-#ifndef FALSE
-#define FALSE 0
-#endif
-#define LIST_DEALLOC   -1
-#define LIST_NODEALLOC -2
-#define LIST_EMPTY     0
-#define LIST_OK        1
-#define LIST_EXTENT    2
+/* 
+ * List comparator function type, used in list traversal for 
+ * caller supplied custom comparators. Takes two void * data pointers, 
+ * does the custom compare and returns list_boolean, LIST_TRUE or LIST_FALSE,
+ * as the result.
+ */
+typedef list_boolean_t (*list_comparator_t)(void *userdata, void *listdata); 
 
-/* Define some macros for performance. */
-#define list_front(l)   (((l)->front == NULL) ? NULL : ((l)->front->data))
-#define list_curr(l)    (((l)->curr == NULL) ? NULL : ((l)->curr->data))
-#define list_rear(l)    (((l)->rear == NULL) ? NULL : ((l)->rear->data))
-#define list_mvfront(l) ((l)->curr = (l)->front, (l))
-#define list_mvrear(l)  ((l)->curr = (l)->rear, (l))
-#define list_empty(l)   (((l)->front == NULL) ? TRUE : FALSE)
-#define list_size(l)    ((l)->size)
+/* 
+ * List deallocator function type, used in list destroy for 
+ * caller supplied custom data deallocation. Takes a void * data pointer, 
+ * does the custom deallocation and returns nothing as the result.
+ */
+typedef void (*list_deallocator_t)(void *data);
+
+/* Prototype ahoy! */
+
+/* List creation and destruction routines */
+LIST *list_create();
+void  list_destroy(LIST *list, list_deallocator_t func);
+
+/* Simple list size utility routines */
+list_boolean_t	list_empty(LIST *list);
+uint32_t   	list_size(LIST *list);
+
+/* Basic list data access routines */
+void *list_front(LIST *list);
+void *list_curr(LIST *list);
+void *list_rear(LIST *list);
+
+/* List element access */
+LIST_ELEMENT *list_element_front(LIST *list);
+LIST_ELEMENT *list_element_curr(LIST *list);
+LIST_ELEMENT *list_element_rear(LIST *list);
+
+ /* Basic list movement routines */
+LIST *list_mvprev(LIST *list);
+LIST *list_mvnext(LIST *list);
+LIST *list_mvfront(LIST *list);
+LIST *list_mvrear(LIST *list);
+LIST *list_setcurr(LIST *list, LIST_ELEMENT *element);
+
+/* List manipulation routines */
+void *list_insert_before(LIST *list, void *data, size_t bytes);
+void *list_insert_after(LIST *list, void *data, size_t bytes);
+void *list_remove_front(LIST *list);
+void *list_remove_rear(LIST *list);
+void *list_remove_curr(LIST *list);
+
+int   list_traverse(LIST *list, void *userdata,
+		    list_comparator_t func, int opts);
 
 #endif /* _LIST_H */

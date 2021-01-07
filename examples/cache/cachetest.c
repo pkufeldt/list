@@ -25,13 +25,17 @@ static char brag[] = "$$Version: cachetest-2.1 Copyright (C) 1992 Bradley C. Spa
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include <stddef.h>
 #include "cache.h"
 
 #define MAX_ELEMENTS 3
 
-int match();
+list_boolean_t match(void *data, void *curr);
+int print_cache(CACHE *cache);
 
-main()
+int
+main(int argc, char *argv[])
 {
    CACHE *cache;
    char cmd[2];
@@ -99,11 +103,10 @@ main()
  * That function continues if the user-supplied function is TRUE.  We want
  * to stop when we've found our element.
  */
-int match(data, curr)
-char *data;
-char *curr;
+list_boolean_t
+match(void *data, void *curr)
 {
-   return(((*(int *) data) == (*(int *) curr)) ? FALSE : TRUE);
+   return(((*(int *) data) == (*(int *) curr)) ? CACHE_FALSE : CACHE_TRUE);
 }
 
 
@@ -111,16 +114,15 @@ char *curr;
  * the list(3) package.  It makes knowledge of the CACHE structure as
  * well.  We do this here for illustration only.
  */
-int print_element(input, curr)
-char *input;
-char *curr;
+list_boolean_t
+print_element(void *input, void *curr)
 {
    printf(" %d", *(int *) curr);
-   return(TRUE);
+   return(CACHE_TRUE);
 }
 
-print_cache(cache)
-CACHE *cache;
+int
+print_cache(CACHE *cache)
 {
    printf("Cache:");
    if (list_empty(cache->list))

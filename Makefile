@@ -21,44 +21,29 @@
 #
 #
 CC	= gcc
-#CFLAGS	= $(DEFINES) -fstrength-reduce -finline-functions -I.
-CFLAGS	= $(DEFINES) -I. -g
-DEFINES = -DUSE_MACROS
+CFLAGS	= -I. -O2 -g
 LIBS	= -L. -llist
-#LIBS	= -L . -llist   # Use this for HP-UX; great loader guys!
-CPP	= cpp -E -P -I. -w
 MANDIR	= /usr/local/man
 LIBDIR	= /usr/local/lib
 INCDIR	= /usr/local/include
 
-# We specify some goofy dependencies between the man pages and the source,
-# because the man page reflects whether USE_MACROS was specified.  Thus,
-# the dependencies that follow insure the library and the man page
-# are always in sync.  A similar argument goes for the header file and it's
-# prototype.  To be sure, you can always make clean and make.
-
-all:		liblist.a #list.3 queue.3 stack.3
-
-examples:
+all:		liblist.a list.3 queue.3 stack.3
 		(cd examples; make)
 
 liblist.a:	list.o
 		ar rc liblist.a list.o
 		ranlib liblist.a
 
-list.o:		list.h list.3 Makefile
-
-#list.h:		list.h.proto Makefile
-#		$(CPP) $(DEFINES) list.h.proto > list.h
+list.o:		list.h Makefile
 
 list.3:		list.man list.c Makefile
-		$(CPP) $(DEFINES) list.man > list.3
+		cp list.man list.3
 
 queue.3:	queue.man list.c Makefile
-		$(CPP) $(DEFINES) queue.man > queue.3
+		cp queue.man queue.3
 
 stack.3:	stack.man list.c Makefile
-		$(CPP) $(DEFINES) stack.man > stack.3
+		cp stack.man stack.3
 
 install:
 		install -c liblist.a $(LIBDIR)
@@ -77,5 +62,4 @@ install.man:
 
 clean:
 		rm -f *.o *.a *.3 core
-#		rm -f *.o *.a list.h *.3 core
 		(cd examples; make clean)

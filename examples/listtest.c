@@ -25,9 +25,19 @@ static char brag[] = "$$Version: listtest-2.1 Copyright (C) 1992 Bradley C. Spat
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include <stddef.h>
 #include "../list.h"
 
-main()
+int print_list(LIST *list);
+int do_insert(LIST *list);
+int do_remove(LIST *list);
+int do_move(LIST *list);
+int do_setcurr(LIST *list);
+int do_traverse(LIST *list);
+
+int
+main(int argc, char *argv[])
 {
    LIST *list;
    char cmd[2];
@@ -41,12 +51,13 @@ main()
    printf("the man page for more information.\n\n");
 
    /* Allocate a new list. */
-   list = list_init();
+   list = list_create();
    printf("Curr = (nil).\n");
    print_list(list);
 
    /* Get some commands. */
-   printf("\n(i)nsert, (r)emove; (m)ove, (f)ront/r(e)ear, (t)raverse, (s)ize, (q)uit: ");
+   printf("\n");
+   printf("(i)nsert/(r)emove\n(f)ront/r(e)ear\n(m)ove/set(c)urr\n(t)raverse, (s)ize, (q)uit: ");
    while (scanf("%1s", cmd) != EOF) {
       switch (cmd[0]) {
          case 'i':
@@ -57,6 +68,9 @@ main()
 	    break;
          case 'm':
 	    do_move(list);
+	    break;
+         case 'c':
+	    do_setcurr(list);
 	    break;
          case 'f':
             pval = (int *) list_front(list);
@@ -76,10 +90,10 @@ main()
 	    do_traverse(list);
 	    break;
          case 's':
-	    printf("List has %d elements.\n", list_size(list));
+	    printf("List has %u elements.\n", list_size(list));
 	    break;
 	 case 'q':
-	    list_free(list, LIST_DEALLOC);
+	    list_destroy(list, (void *)LIST_DEALLOC);
 	    exit(0);
 	    break;
          default:
@@ -92,21 +106,20 @@ main()
       else
 	 printf("Curr = %d\n", *pval);
       print_list(list);
-      printf("\n(i)nsert, (r)emove; (m)ove, (f)ront/r(e)ear, (t)raverse, (s)ize, (q)uit: ");
+      printf("(i)nsert/(r)emove\n(f)ront/r(e)ear\n(m)ove/set(c)urr\n(t)raverse, (s)ize, (q)uit: ");
    }
 
    exit(0);
 }
 
-
-do_insert(list)
-LIST *list;
+int
+do_insert(LIST *list)
 {
    char cmd[2];
-   int val, *bogus;
+   int val, *bogus, rc;
 
    printf("insert (b)efore or (a)after: ");
-   scanf("%1s", cmd);
+   rc = scanf("%1s", cmd);
    switch (cmd[0]) {
       case 'b':
 	 printf("Value (int) to insert before: ");
@@ -130,14 +143,14 @@ LIST *list;
 }
 
 
-do_remove(list)
-LIST *list;
+int
+do_remove(LIST *list)
 {
    char cmd[2];
-   int *pval;
+   int *pval, rc;
    
    printf("remove (f)ront, (c)urr, or (r)ear: ");
-   scanf("%1s", cmd);
+   rc = scanf("%1s", cmd);
    switch (cmd[0]) {
       case 'f':
 	 pval = (int *) list_remove_front(list);
@@ -159,13 +172,50 @@ LIST *list;
 }
 
 
-do_move(list)
-LIST *list;
+int
+do_setcurr(LIST *list)
+{
+	LIST_ELEMENT *e;
+	char cmd[2];
+	int rc;
+	
+	printf("pickup to (c) curr, (f)ront, or (r)ear: ");
+	rc = scanf("%1s", cmd);
+	switch (cmd[0]) {
+	case 'c':
+		/* We ignore the return code here. */
+		e = list_element_curr(list);
+		break;
+	case 'f':
+		/* We ignore the return code here. */
+		e = list_element_front(list);
+		break;
+	case 'r':
+		/* We ignore the return code here. */
+		e = list_element_rear(list);
+		break;
+	default:
+		printf("%c not recognized.  Returning to main menu.\n", cmd[0]);
+		return 1;
+	}
+	
+	if (!e) {
+		printf("No element.  Returning to main menu.\n");
+		return 1;
+	}
+
+	list_setcurr(list, e);
+}
+
+
+int
+do_move(LIST *list)
 {
    char cmd[2];
-
+   int rc;
+   
    printf("move to (p)revious, (n)ext, (f)ront, or (r)ear: ");
-   scanf("%1s", cmd);
+   rc = scanf("%1s", cmd);
    switch (cmd[0]) {
       case 'p':
 	 if (list_mvprev(list) == NULL)
@@ -194,23 +244,22 @@ LIST *list;
  * searching the list or something.  We must return 0 or 1, so we always
  * return 1.
  */
-int print_element(input, curr)
-char *input;
-char *curr;
+list_boolean_t
+print_element(void *input, void *curr)
 {
    printf(" %d", *(int *) curr);
-   return(TRUE);
+   return(LIST_TRUE);
 }
 
 
-do_traverse(list)
-LIST *list;
+int
+do_traverse(LIST *list)
 {
    char cmd[2];
    int opts=0, rc;
 
    printf("traverse from (f)ront, (r)ear, or (c)urrent element: ");
-   scanf("%1s", cmd);
+   rc = scanf("%1s", cmd);
    switch (cmd[0]) {
       case 'f':
          opts = (opts | LIST_FRNT);
@@ -227,7 +276,7 @@ LIST *list;
 
    if (cmd[0] == 'c') {
       printf("traverse (f)orwards or (b)ackwards: ");
-      scanf("%1s", cmd);
+      rc = scanf("%1s", cmd);
       switch (cmd[0]) {
          case 'f':
             opts = (opts | LIST_FORW);
@@ -241,7 +290,7 @@ LIST *list;
    }
 
    printf("(a)lter or (p)reserve the current element pointer: ");
-   scanf("%1s", cmd);
+   rc = scanf("%1s", cmd);
    switch (cmd[0]) {
       case 'a':
          opts = (opts | LIST_ALTR);
@@ -275,8 +324,8 @@ LIST *list;
  * In this example, we send NULL for the second parameter, which might be
  * used to specify an element to search for.
  */
-print_list(list)
-LIST *list;
+int
+print_list(LIST *list)
 {
    printf("List:");
    if (list_empty(list))

@@ -21,31 +21,22 @@ cc [
 QUEUE *q_init()
 .PP
 .ft B
-char *q_enqueue(q, data, bytes)
-    QUEUE *q;
-    char *data;
-    int bytes;
+char *q_enqueue(QUEUE *q, void *data, size_t bytes);
 .PP
 .ft B
-char *q_dequeue(q)
-    QUEUE *q;
+char *q_dequeue(QUEUE *q)
 .PP
 .ft B
-char *q_front(q)
-    QUEUE *q;
+char *q_front(QUEUE *q)
 .PP
 .ft B
-int q_size(q)
-    QUEUE *q;
+uint32_t q_size(QUEUE *q)
 .PP
 .ft B
-int q_empty(q)
-    QUEUE *q;
+list_boolean_t q_empty(QUEUE *q)
 .PP
 .ft B
-void q_free(q, dealloc)
-    QUEUE *q;
-    void (*dealloc)();
+void q_free(QUEUE *q, list_deallocator_t dealloc)
 .SH DESCRIPTION
 These routines provide generic queue manipulation of (potentially)
 multiple queues.  Each queue can hold arbitrarily sized elements, with
@@ -87,26 +78,17 @@ and returns a pointer to the removed data.
 .IR q_front
 returns a pointer to the element at the front of
 .IR q ,
-but does not remove the element. \c
-#ifdef USE_MACROS
-This routine is implemented as a macro. \c
-#endif
+but does not remove the element.
 .PP
 .IR q_size
 returns the number of elements in
 .IR q
-as an integer. \c
-#ifdef USE_MACROS
-This routine is implemented as a macro. \c
-#endif
+as an integer.
 .PP
 .IR q_empty
-returns 1 (TRUE) if
+returns 1 (QUEUE_TRUE) if
 .IR q
-is empty, 0 (FALSE) otherwise. \c
-#ifdef USE_MACROS
-This routine is implemented as a macro. \c
-#endif
+is empty, 0 (QUEUE_FALSE) otherwise.
 .PP
 .IR q_free
 deallocates
@@ -115,14 +97,14 @@ applying the user-supplied function
 .IR dealloc
 to the data portion of each element remaining in the queue.  If
 .IR dealloc
-is QUEUE_DEALLOC, then the package will apply its own deallocation
+is (void *)QUEUE_DEALLOC, then the package will apply its own deallocation
 routine.  This, however, should only be done if the package has been
 responsible for data element allocation, i.e., the enqueue routine has
 been invoked with
 .IR bytes
 greater than 0.  If
 .IR dealloc
-is QUEUE_NODEALLOC, no per-element deallocation will be performed.
+is (void *)QUEUE_NODEALLOC, no per-element deallocation will be performed.
 .SH MEMORY ALLOCATION
 Both
 .IR q_init

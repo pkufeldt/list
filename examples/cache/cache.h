@@ -28,10 +28,12 @@ typedef struct cache_t {
 
 /* Provide some useful prototypes. */
 CACHE *cache_init();
-char *cache_enter();
-char *cache_check();
+void *cache_enter();
+void *cache_check();
 void cache_free();
 
 /* Define the deallocation constants. */
 #define CACHE_DEALLOC   LIST_DEALLOC
 #define CACHE_NODEALLOC LIST_NODEALLOC
+#define CACHE_TRUE	LIST_TRUE
+#define CACHE_FALSE	LIST_FALSE

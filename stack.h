@@ -30,14 +30,16 @@
  * where we push and pop.  With this model, we can map into the list
  * primitives directly.
  */
-#define stack_init()                     list_init()
+#define stack_init()                     list_create()
 #define stack_push(stack, data, bytes)   list_insert_before(stack, data, bytes)
 #define stack_pop(stack)                 list_remove_front(stack)
 #define stack_top(stack)                 list_front(stack)
 #define stack_size(stack)                list_size(stack)
 #define stack_empty(stack)               list_empty(stack)
-#define stack_free(stack, dealloc)       list_free(stack, dealloc)
+#define stack_free(stack, dealloc)       list_destroy(stack, dealloc)
 
 /* Define the deallocation constants. */
 #define STACK_DEALLOC   LIST_DEALLOC
 #define STACK_NODEALLOC LIST_NODEALLOC
+#define STACK_TRUE	LIST_TRUE
+#define STACK_FALSE	LIST_FALSE

@@ -55,10 +55,12 @@ static char brag[] = "$$Version: cache-2.1 Copyright (C) 1992 Bradley C. Spatz";
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include <stddef.h>
 #include "cache.h"
 
-CACHE *cache_init(max_elements)
-int max_elements;
+CACHE *
+cache_init(int max_elements)
 {
    CACHE *new_cache;
 
@@ -69,7 +71,7 @@ int max_elements;
       return(NULL);
    }
    new_cache->max_elements = max_elements;
-   if ((new_cache->list = list_init()) == NULL) {
+   if ((new_cache->list = list_create()) == NULL) {
       /* The list creation fragged, so release the cache descriptor. */
       free(new_cache);
       return(NULL);
@@ -79,11 +81,8 @@ int max_elements;
 }
 
 
-char *cache_enter(cache, data, bytes, removed)
-CACHE *cache;
-char *data;
-int bytes;
-char **removed;
+void *
+cache_enter(CACHE *cache, void *data, int bytes, char **removed)
 {
    char *new_element;
 
@@ -107,10 +106,8 @@ char **removed;
 }
 
 
-char *cache_check(cache, data, match)
-CACHE *cache;
-char *data;
-int (*match)();
+void *
+cache_check(CACHE *cache, void *data, list_comparator_t match)
 {
    char *found;
 
@@ -147,11 +144,10 @@ int (*match)();
 }
 
 
-void cache_free(cache, dealloc)
-CACHE *cache;
-void (*dealloc)();
+void
+cache_free(CACHE *cache, list_deallocator_t dealloc)
 {
    /* First free up the list, and then the cache descriptor. */
-   list_free(cache->list, dealloc);
+   list_destroy(cache->list, dealloc);
    free(cache);
 }
