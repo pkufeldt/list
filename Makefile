@@ -21,7 +21,7 @@
 #
 #
 CC	= gcc
-CFLAGS	= -I. -O2 -g
+CFLAGS	= -I. -O2 -g -fpic
 LIBS	= -L. -llist
 MANDIR	= /usr/local/man
 LIBDIR	= /usr/local/lib
