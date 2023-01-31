@@ -20,15 +20,27 @@
 #
 #
 CC	= gcc -fstrength-reduce -finline-functions
-CFLAGS	= -I../..
-LIBS	= -L. -L../.. -lcache -llist
+CFLAGS	= -g -I../..
+HLIBS	= -L. -L../.. -lhash -llist
+CLIBS	= -L. -L../.. -lcache -llist
 #LIBS	= -L . -L ../.. -lcache -llist      # For HP-UX; great loader guys!
 MANDIR	= /usr/local/man
 LIBDIR	= /usr/local/lib
 INCDIR	= /usr/local/include
 
+all:		hashtest cachetest 
+
+hashtest:	hashtest.o libhash.a
+		$(CC) $(CFLAGS) -o hashtest hashtest.o $(HLIBS)
+
+libhash.a:	hash.o
+		ar rc libhash.a hash.o
+		ranlib libhash.a
+
+cache.o:	cache.h Makefile
+
 cachetest:	cachetest.o libcache.a
-		$(CC) $(CFLAGS) -o cachetest cachetest.o $(LIBS)
+		$(CC) $(CFLAGS) -o cachetest cachetest.o $(CLIBS)
 
 libcache.a:	cache.o
 		ar rc libcache.a cache.o
@@ -37,12 +49,15 @@ libcache.a:	cache.o
 cache.o:	cache.h Makefile
 
 install:
+		install -c libhash.a $(LIBDIR)
 		install -c libcache.a $(LIBDIR)
+		ranlib $(LIBDIR)/libhash.a
 		ranlib $(LIBDIR)/libcache.a
+		install -c hash.h $(INCDIR)
 		install -c cache.h $(INCDIR)
 
 install.man:
 		install -c cache.3 $(MANDIR)/man3
 
 clean:
-		rm -f cachetest *.o *.a core
+		rm -f hashtest cachetest *.o *.a core
