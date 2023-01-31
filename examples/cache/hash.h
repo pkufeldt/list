@@ -1,7 +1,7 @@
 /* hash.c -- routines to implement a hash table based list(3)-based 
  * hashed cache package.
  *
- * Last edited: Time-stamp: <2023-01-30 17:44:41 pak>
+ * Last edited: Time-stamp: <2023-01-30 18:23:03 pak>
  * 
  * Copyright (C) 2023, Philip Kufeldt, pak@integratus.com
  *
@@ -48,11 +48,10 @@ typedef struct hash_stats {
 
 /* Provide some useful prototypes. */
 
-HASH *hash_create(uint32_t max_items);
-void  hash_destroy(HASH *hash);
-void *hash_put(HASH *hash,
-	       uint64_t key, void *data, uint32_t bytes, void **evicted);
-void *hash_get(HASH *hash, uint64_t key);
+HASH 	*hash_create(uint32_t max_items);
+void  	hash_destroy(HASH *hash);
+int 	hash_put(HASH *hash, ced_t *ced, ced_t **evicted);
+ced_t 	*hash_get(HASH *hash, uint64_t key);
 
 /* Some diagnostics */
 hash_stats_t *hash_get_stats(HASH *hash);

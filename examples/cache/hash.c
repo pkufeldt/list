@@ -1,7 +1,7 @@
 /* hash.c -- routines to implement a hash table based list(3)-based 
  * hashed cache package.
  *
- * Last edited: Time-stamp: <2023-01-30 17:43:34 pak>
+ * Last edited: Time-stamp: <2023-01-30 18:34:25 pak>
  * 
  * Copyright (C) 2023, Philip Kufeldt, pak@integratus.com
  *
@@ -61,9 +61,7 @@ static char brag[] = "$$Version: hash-1.0 Copyright (C) 2023 Philip Kufeldt";
 typedef struct hash_item {
 	LIST_ELEMENT	*element; 	/* Back pointer to element in list */
 	LIST 		*list;		/* Back list */
-	uint64_t	key;		/* Key to hash */
-	void 		*data;		/* Stored data */
-	uint32_t	bytes;		/* Stored data length */
+	ced_t		*ced;		/* Caller supplied CED */
 } hash_item_t;
 
 typedef struct hash {
@@ -166,8 +164,8 @@ hash_destroy(HASH *ohash)
 }
 
 
-void *
-hash_put(HASH *ohash, uint64_t key, void *data, uint32_t bytes, void **evicted)
+int
+hash_put(HASH *ohash, ced_t *ced, ced_t **evicted)
 {
 	uint32_t	 index;
 	LIST		*l;
@@ -180,28 +178,24 @@ hash_put(HASH *ohash, uint64_t key, void *data, uint32_t bytes, void **evicted)
 	if (evicted)
 		*evicted = NULL;
 	
-	if (!hash) {
-		return(NULL);
+	if (!hash || !ced) {
+		return(-1);
 	}
 
-	index = HASH_FN(key, hash->max_items);
+	index = HASH_FN(ced->ced_key, hash->max_items);
 	
 	lru_item = malloc(sizeof(hash_item_t));
 	hash_item = malloc(sizeof(hash_item_t));
 	if (!lru_item || ! hash_item) {
 		free(lru_item);
 		free(hash_item);
-		return(NULL);
+		return(-1);
 	}
 
-	lru_item->key   = key;
-	lru_item->data  = data;
-	lru_item->bytes = bytes;
+	lru_item->ced   = ced;
 	lru_item->list  = hash->table[index];
 
-	hash_item->key   = key;
-	hash_item->data  = data;
-	hash_item->bytes = bytes;
+	hash_item->ced   = ced;
 	hash_item->list  = hash->lru_list;
 
 	pthread_mutex_lock(&hash->m);
@@ -214,7 +208,7 @@ hash_put(HASH *ohash, uint64_t key, void *data, uint32_t bytes, void **evicted)
 		
 		free(lru_item);
 		free(hash_item);
-		return(NULL);
+		return(-1);
 	}
 
 	/* Now insert into the correct hash table list */
@@ -226,7 +220,7 @@ hash_put(HASH *ohash, uint64_t key, void *data, uint32_t bytes, void **evicted)
 
 		free(lru_item);
 		free(hash_item);
-		return(NULL);
+		return(-1);
 	}
 
 	/* Create the cross links */ 
@@ -237,7 +231,7 @@ hash_put(HASH *ohash, uint64_t key, void *data, uint32_t bytes, void **evicted)
 	if (list_size(hash->lru_list) > hash->max_items) {
 		/* here is the LRU removal */
 		lru_item = (hash_item_t *) list_remove_rear(hash->lru_list);
-		index = lru_item->key % hash->max_items; /* Hash function */
+		index = HASH_FN(lru_item->ced->ced_key, hash->max_items); 
 	
 		/* Use the removed lru_item to cleanup the hash table */
 		l = list_setcurr(hash->table[index], lru_item->element);
@@ -249,14 +243,14 @@ hash_put(HASH *ohash, uint64_t key, void *data, uint32_t bytes, void **evicted)
 
 		/* set returned removed data */
 		hash->stats.evictions++;
-		*evicted = hash_item->data;
+		*evicted = hash_item->ced;
 		free(lru_item);
 		free(hash_item);
 	}
 
 	hash->stats.insertions++;
 	pthread_mutex_unlock(&hash->m);
-	return(p->data);
+	return(0);
 }
 
 
@@ -266,7 +260,7 @@ hash_keymatch(void *data, void *hdata)
 	list_boolean_t	match = LIST_TRUE;
 	uint64_t	key   = *(uint64_t *)data;
 
-	if (key == ((hash_item_t *)hdata)->key)
+	if (key == ((hash_item_t *)hdata)->ced->ced_key)
 		match = LIST_FALSE;  /* False terminates the search, ie found */
 	return (match);
 }
@@ -277,16 +271,16 @@ hash_datamatch(void *data, void *hdata)
 {
 	list_boolean_t	match = LIST_TRUE;
 
-	if (data == ((hash_item_t *)hdata)->data)
+	if (data == ((hash_item_t *)hdata)->ced->ced_buf)
 		match = LIST_FALSE;  /* False terminates the search, ie found */
 	return (match);
 }
 
 
-void *
+ced_t *
 hash_get(HASH *ohash, uint64_t key)
 {
-	char 		*found = NULL;
+	ced_t 		*ced = NULL;
 	uint32_t	index;
 	hash_t		*hash = (hash_t *)ohash;
 	hash_item_t 	*lru_item;
@@ -325,14 +319,14 @@ hash_get(HASH *ohash, uint64_t key)
 			list_insert_before(hash->lru_list, lru_item, 0);
 		}
 
-		found = hash_item->data;
+		ced = hash_item->ced;
 		hash->stats.hits++;
 	} else {
 		hash->stats.misses++;
 	}	
 
 	pthread_mutex_unlock(&hash->m);
-	return(found);
+	return(ced);
 }
 
 
@@ -355,9 +349,9 @@ hash_get_stats(HASH *ohash)
 list_boolean_t
 hash_keyprint(void *data, void *ohdata)
 {
-	hash_item_t *hdata = (hash_item_t *)ohdata;
+	ced_t *ced = ((hash_item_t *)ohdata)->ced;
 
-	printf("[%lu, %p]->", hdata->key, hdata->data);
+	printf("[%lu, %p]->", ced->ced_key, ced->ced_buf);
 	return (LIST_TRUE);
 }
 
@@ -412,6 +406,7 @@ hash_check(HASH *ohash)
 	hash_item_t	*lru_item, *hash_item;
 	LIST_ELEMENT 	*lru_element, *hash_element;
 	uint32_t	items, iitems, titems;
+	ced_t		*lced, *hced;
 	int 		i, match, last=0;
 
 	if (!hash) {
@@ -484,49 +479,52 @@ hash_check(HASH *ohash)
 		if (!list_mvnext(hash->lru_list)) {
 			last = 1;
 		}
-		
+
+		lced = lru_item->ced;
+
 		match=0;
-		if (list_traverse(hash->lru_list, &lru_item->key, hash_keymatch,
+		if (list_traverse(hash->lru_list, &lced->ced_key, hash_keymatch,
 				  (LIST_FRNT | LIST_FORW)) == LIST_OK) {
 			match++;
 		}
 		if (!last &&
 		    (list_traverse(hash->lru_list,
-				   &lru_item->key, hash_keymatch,
+				   &lced->ced_key, hash_keymatch,
 				   (LIST_CURR | LIST_FORW)) == LIST_OK)) {
 			match++;
 		}
 
 		if (match !=1 ) {
 			printf("%s: lru key not unique (%lu)\n",
-			       __func__, lru_item->key);
+			       __func__, lced->ced_key);
 		}
 
 		match=0;
 		if (list_traverse(hash->lru_list,
-				  lru_item->data, hash_datamatch,
+				  lced->ced_buf, hash_datamatch,
 				  (LIST_FRNT | LIST_FORW)) == LIST_OK) {
 			match++;
 		}
 		if (!last &&
 		    (list_traverse(hash->lru_list,
-				   lru_item->data, hash_datamatch,
+				   lced->ced_buf, hash_datamatch,
 				   (LIST_CURR | LIST_FORW)) == LIST_OK)) {
 			match++;
 		}
 
 		if (match !=1 ) {
 			printf("%s: lru data ptr not unique (%p)\n",
-			       __func__, lru_item->data);
+			       __func__, lced->ced_buf);
 		}
 
 		/* Now find the item in the hash list and validate it */
-		i = HASH_FN(lru_item->key, hash->max_items);
-		if (list_traverse(hash->table[i], &lru_item->key, hash_keymatch,
+		i = HASH_FN(lced->ced_key, hash->max_items);
+		if (list_traverse(hash->table[i], &lced->ced_key, hash_keymatch,
 				  (LIST_FRNT | LIST_FORW | LIST_ALTR)) == LIST_OK) {
 
 			hash_item = list_curr(hash->table[i]);
 			hash_element = list_element_curr(hash->table[i]);
+			hced = hash_item->ced;
 
 			if (lru_item->element != hash_element) {
 				printf("%s: lru element incorrect (%p != %p)\n",
@@ -552,28 +550,26 @@ hash_check(HASH *ohash)
 				       hash_item->list, hash->lru_list);
 			}
 
-			if (hash_item->key != lru_item->key) {
+			if (hced->ced_key != lced->ced_key) {
 				printf("%s: key incorrect (%lu != %lu)\n",
-				       __func__,
-				       hash_item->key, lru_item->key);
+				       __func__, hced->ced_key, lced->ced_key);
 			}
 			
-			if (hash_item->data != lru_item->data) {
+			if (hced->ced_buf != lced->ced_buf) {
 				printf("%s: data incorrect (%p != %p)\n",
-				       __func__,
-				       hash_item->data, lru_item->data);
+				       __func__, hced->ced_buf, lced->ced_buf);
 			}
 			
-			if (hash_item->bytes != lru_item->bytes) {
-				printf("%s: bytes incorrect (%u != %u)\n",
+			if (hced->ced_buflen != lced->ced_buflen) {
+				printf("%s: bytes incorrect (%lu != %lu)\n",
 				       __func__,
-				       hash_item->bytes, lru_item->bytes);
+				       hced->ced_buflen, lced->ced_buflen);
 			}
 
 		} else {
 			/* failed to find it */
 			printf("%s: filed to find lru_item in table (%lu)\n",
-			       __func__, lru_item->key);
+			       __func__, lced->ced_key);
 		}
 	}
 
