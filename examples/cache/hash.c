@@ -1,7 +1,7 @@
 /* hash.c -- routines to implement a hash table based list(3)-based 
  * hashed cache package.
  *
- * Last edited: Time-stamp: <2023-01-30 18:34:25 pak>
+ * Last edited: Time-stamp: <2023-01-31 18:54:43 pak>
  * 
  * Copyright (C) 2023, Philip Kufeldt, pak@integratus.com
  *
@@ -369,7 +369,8 @@ hash_print(HASH *ohash)
 
 	pthread_mutex_lock(&hash->m);
 	printf("Hash:\n");
-	printf("\tMax Items: %u\n", hash->max_items);
+	printf("\tItems: %u of %u\n",
+	       list_size(hash->lru_list), hash->max_items);
 	printf("\tLRU List:");
 	list_traverse(hash->lru_list, NULL, hash_keyprint,
 		      (LIST_FRNT | LIST_FORW | LIST_ALTR));

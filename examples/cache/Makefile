@@ -20,7 +20,7 @@
 #
 #
 CC	= gcc -fstrength-reduce -finline-functions
-CFLAGS	= -g -I../..
+CFLAGS	= -g -O3 -I../..
 HLIBS	= -L. -L../.. -lhash -llist
 CLIBS	= -L. -L../.. -lcache -llist
 #LIBS	= -L . -L ../.. -lcache -llist      # For HP-UX; great loader guys!
